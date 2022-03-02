@@ -1,0 +1,16 @@
+{
+    "name": "ocdladefense/lib-salesforce",
+    "description": "PHP wrapper classes for SObjects functions.",
+		"license": "MIT",
+    "authors": [
+        {
+            "name": "Jose Bernal",
+            "email": "jbernal.web.dev@gmail.com"
+        }
+    ],
+    "autoload": {
+        "classmap":[
+            "src/"
+        ]
+    }
+}
