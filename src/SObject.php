@@ -3,27 +3,23 @@
 namespace Salesforce;
 
 
+
 class SObject {
+
 
     // Representation of the underlying SObject.
     private $sobject;
 
-
-    // Name / type of SObject.
+    
     private $name;
 
-
-    // Metadata associated with the SObject.
     private $meta;
 
-
-    // ?
     private $api;
 
 
 
     
-
     public function getSObject($name) {
 
         return $this->sobject[$name];
@@ -39,11 +35,6 @@ class SObject {
 
         return $list;
     }
-
-
-
-
-    
 
     public function __construct($name){
 
@@ -91,5 +82,4 @@ class SObject {
 
         return $pValues;
     }
-
 }
