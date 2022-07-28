@@ -8,20 +8,37 @@ class ContentDocument extends SalesforceFile { // implements ISObject
     public $SObjectName = "ContentVersion";
 
     protected $Id;
+
     private $ContentDocumentId;
+
     private $LinkedEntityId;
 
     private $id;
+
     private $title;
+
     private $fileSize;
+
     private $extension;
+
     private $fileType;
+
     private $ownerName;
+
     private $ownerId;
+
     private $linkedEntityId;
 
-
     public $isLocal = false;
+
+
+
+
+
+
+
+
+
 
     public function __construct($id = null){ // Maybe the default constructor takes the Id.
 
@@ -59,11 +76,6 @@ class ContentDocument extends SalesforceFile { // implements ISObject
     }
 
 
-
-    public function id() {
-
-        return $this->id;
-    }
 
     public function title() {
 
@@ -124,15 +136,12 @@ class ContentDocument extends SalesforceFile { // implements ISObject
         return $sfFile;
     }
 
-    public static function fromContentDocumentLinkQueryResult($contentDocumentLinkQueryResults) {
 
-        $documents = [];
 
-        foreach($contentDocumentLinkQueryResults as $result) {
+    // Previously a static method.  We've converted it to be an instance method.
+    public function setDocumentData($data) {
 
             $data = $result["ContentDocument"];
-
-            $doc = new self();
             $doc->id = $result["ContentDocumentId"];
             $doc->title = $data["Title"];
             $doc->fileSize = calculateFileSize($data["ContentSize"]);
@@ -141,13 +150,47 @@ class ContentDocument extends SalesforceFile { // implements ISObject
             $doc->uploadedBy = $result["ownerName"];
             $doc->ownerId = $result["ownerId"];
             $doc->linkedEntityId = $result["LinkedEntityId"];
-            
 
-            $documents[] = $doc;
-        }
-
-        return $documents;
     }
+
+
+
+
+	// Return an associative array of contacts, keyed by the ContentDocumentIds.
+	// I don't know why we *need to query for anything here.
+	public function getOwners() {
+
+        // We add $links using the setLinks() method from the caller.
+        $documentLinks = $this->links;
+
+		$ids = $documentLinks->getField("LinkedEntityId");
+
+		$format = "SELECT Id, Name FROM Contact WHERE Id in (:array)";
+		$query = DbHelper::parseArray($format, $ids);
+		$resp = loadApi()->query($query);
+		
+		if(!$resp->success()) throw new Exception($resp->getErrorMessage());
+
+		$contacts = $resp->getQueryResult()->key("Id");
+
+		// We only want the 
+		$contactEntities = array_filter($documentLinks->getRecords(), function($link){
+
+			return self::getSobjectType($link["LinkedEntityId"]) == "Contact";
+		});
+
+		$owners = [];
+
+		foreach($contactEntities as $entity) {
+
+			$owners[$entity["ContentDocumentId"]] = $contacts[$entity["LinkedEntityId"]];
+		
+		}
+
+		return $owners;
+	}
+
+
 
     public static function fromJson($json){
 
