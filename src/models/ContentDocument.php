@@ -11,14 +11,8 @@ class ContentDocument extends SalesforceFile { // implements ISObject
     private $ContentDocumentId;
     private $LinkedEntityId;
 
-    private $id;
-    private $title;
-    private $fileSize;
-    private $extension;
-    private $fileType;
-    private $ownerName;
-    private $ownerId;
-    private $linkedEntityId;
+    public $data;
+    public $linkedEntities = [];
 
 
     public $isLocal = false;
@@ -58,42 +52,44 @@ class ContentDocument extends SalesforceFile { // implements ISObject
         return $this->ContentDocumentId;
     }
 
+    public function setDocumentData($data) {
 
+        $this->data = $data;
+    }
+
+    public function setLinkedEntities($links) {
+
+        foreach($links as $link) {
+
+            $this->linkedEntities[] = $link["LinkedEntityId"];
+        }
+    }
 
     public function id() {
 
-        return $this->id;
+        return $this->Id;
     }
 
     public function title() {
 
-        return $this->title;
+        return $this->data["Title"];
     }
 
     public function fileSize() {
 
-        return $this->fileSize;
+        return calculateFileSize($this->data["ContentSize"]);
     }
 
     public function fileType() {
 
-        return $this->fileType;
+        return $this->data["FileType"];
     }
 
     public function extension() {
 
-        return $this->extension;
+        return $this->data["FileExtension"];
     }
 
-    public function uploadedBy() {
-
-        return empty($this->uploadedBy) ? "OCDLA APP" : $this->uploadedBy;
-    }
-
-    public function ownerId() {
-
-        return $this->ownerId;
-    }
 
     public function linkedEntityId() {
 
@@ -102,7 +98,9 @@ class ContentDocument extends SalesforceFile { // implements ISObject
 
     public function userIsOwner() {
 
-        return current_user()->getContactId() == $this->ownerId;
+        $contactId = current_user()->getContactId();
+
+        return in_array($contactId, $this->linkedEntities);
     }
 
     
@@ -124,30 +122,6 @@ class ContentDocument extends SalesforceFile { // implements ISObject
         return $sfFile;
     }
 
-    public static function fromContentDocumentLinkQueryResult($contentDocumentLinkQueryResults) {
-
-        $documents = [];
-
-        foreach($contentDocumentLinkQueryResults as $result) {
-
-            $data = $result["ContentDocument"];
-
-            $doc = new self();
-            $doc->id = $result["ContentDocumentId"];
-            $doc->title = $data["Title"];
-            $doc->fileSize = calculateFileSize($data["ContentSize"]);
-            $doc->fileType = $data["FileType"];
-            $doc->extension = $data["FileExtension"];
-            $doc->uploadedBy = $result["ownerName"];
-            $doc->ownerId = $result["ownerId"];
-            $doc->linkedEntityId = $result["LinkedEntityId"];
-            
-
-            $documents[] = $doc;
-        }
-
-        return $documents;
-    }
 
     public static function fromJson($json){
 
