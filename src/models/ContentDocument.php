@@ -8,14 +8,26 @@ class ContentDocument extends SalesforceFile { // implements ISObject
     public $SObjectName = "ContentVersion";
 
     protected $Id;
+
     private $ContentDocumentId;
+
     private $LinkedEntityId;
 
     public $data;
     public $linkedEntities = [];
 
+    private $linkedEntityId;
 
     public $isLocal = false;
+
+
+
+
+
+
+
+
+
 
     public function __construct($id = null){ // Maybe the default constructor takes the Id.
 
@@ -121,6 +133,45 @@ class ContentDocument extends SalesforceFile { // implements ISObject
 
         return $sfFile;
     }
+
+
+
+
+
+	// Return an associative array of contacts, keyed by the ContentDocumentIds.
+	// I don't know why we *need to query for anything here.
+	public function getOwners() {
+
+        // We add $links using the setLinks() method from the caller.
+        $documentLinks = $this->links;
+
+		$ids = $documentLinks->getField("LinkedEntityId");
+
+		$format = "SELECT Id, Name FROM Contact WHERE Id in (:array)";
+		$query = DbHelper::parseArray($format, $ids);
+		$resp = loadApi()->query($query);
+		
+		if(!$resp->success()) throw new Exception($resp->getErrorMessage());
+
+		$contacts = $resp->getQueryResult()->key("Id");
+
+		// We only want the 
+		$contactEntities = array_filter($documentLinks->getRecords(), function($link){
+
+			return self::getSobjectType($link["LinkedEntityId"]) == "Contact";
+		});
+
+		$owners = [];
+
+		foreach($contactEntities as $entity) {
+
+			$owners[$entity["ContentDocumentId"]] = $contacts[$entity["LinkedEntityId"]];
+		
+		}
+
+		return $owners;
+	}
+
 
 
     public static function fromJson($json){
