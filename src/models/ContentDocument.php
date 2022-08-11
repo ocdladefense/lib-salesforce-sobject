@@ -71,10 +71,11 @@ class ContentDocument extends SalesforceFile { // implements ISObject
 
     public function setLinkedEntities($links) {
 
-        foreach($links as $link) {
+        $this->linkedEntities = array_map(function($link){
 
-            $this->linkedEntities[] = $link["LinkedEntityId"];
-        }
+            return $link["LinkedEntityId"];
+
+        }, $links);
     }
 
     public function id() {
@@ -108,9 +109,39 @@ class ContentDocument extends SalesforceFile { // implements ISObject
         return $this->linkedEntityId;
     }
 
-    public function userIsOwner() {
 
-        $contactId = current_user()->getContactId();
+    public function uploadedById() {
+
+        // SObject Prefix
+        $contactPrefix = "003";
+
+        $uploadedByIds = array_filter($this->linkedEntities, function($id) use($contactPrefix) {
+
+            return substr($id, 0, 3) == $contactPrefix;
+        });
+
+        return array_values($uploadedByIds)[0];
+    }
+
+
+    public function getSharedWithIds(){
+
+        // We don't need to see the admin users or contacts in the "shared with" column.
+        $ignoredPrefixes = ["Contact" => "003", "User" => "005"];
+
+        $sharedWith = array_filter($this->linkedEntities, function($id) use($ignoredPrefixes) {
+
+            $idPrefix = substr($id, 0, 3);
+
+            return !in_array($idPrefix, $ignoredPrefixes);
+        });
+
+        return $sharedWith;
+
+    }
+
+    // Is the contact the person who uploaded the document?
+    public function isOwner($contactId) {
 
         return in_array($contactId, $this->linkedEntities);
     }
