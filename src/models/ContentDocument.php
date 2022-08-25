@@ -23,6 +23,8 @@ class ContentDocument extends SalesforceFile { // implements ISObject
 
     public $sharedWith = [];
 
+    public $uploadedBy;
+
 
 
 
@@ -112,7 +114,18 @@ class ContentDocument extends SalesforceFile { // implements ISObject
     }
 
 
-    public function uploadedById() {
+    public function setUploadedBy($name) {
+
+        $this->uploadedBy = $name;
+    }
+
+    public function getUploadedBy() {
+
+        return $this->uploadedBy;
+    }
+
+
+    public function getUploadedById() {
 
         // SObject Prefix
         $contactPrefix = "003";
@@ -126,21 +139,21 @@ class ContentDocument extends SalesforceFile { // implements ISObject
     }
 
 
-    public function getSharedWithIds(){
+    // public function getSharedWithIds(){
 
-        // We don't need to see the admin users or contacts in the "shared with" column.
-        $ignoredPrefixes = ["Contact" => "003", "User" => "005"];
+    //     // We don't need to see the admin users or contacts in the "shared with" column.
+    //     $ignoredPrefixes = ["Contact" => "003", "User" => "005"];
 
-        $sharedWith = array_filter($this->linkedEntities, function($id) use($ignoredPrefixes) {
+    //     $sharedWith = array_filter($this->linkedEntities, function($id) use($ignoredPrefixes) {
 
-            $idPrefix = substr($id, 0, 3);
+    //         $idPrefix = substr($id, 0, 3);
 
-            return !in_array($idPrefix, $ignoredPrefixes);
-        });
+    //         return !in_array($idPrefix, $ignoredPrefixes);
+    //     });
 
-        return $sharedWith;
+    //     return $sharedWith;
 
-    }
+    // }
 
 
 
@@ -186,37 +199,37 @@ class ContentDocument extends SalesforceFile { // implements ISObject
 
 	// Return an associative array of contacts, keyed by the ContentDocumentIds.
 	// I don't know why we *need to query for anything here.
-	public function getOwners() {
+	// public function getOwners() {
 
-        // We add $links using the setLinks() method from the caller.
-        $documentLinks = $this->links;
+    //     // We add $links using the setLinks() method from the caller.
+    //     $documentLinks = $this->links;
 
-		$ids = $documentLinks->getField("LinkedEntityId");
+	// 	$ids = $documentLinks->getField("LinkedEntityId");
 
-		$format = "SELECT Id, Name FROM Contact WHERE Id in (:array)";
-		$query = DbHelper::parseArray($format, $ids);
-		$resp = loadApi()->query($query);
+	// 	$format = "SELECT Id, Name FROM Contact WHERE Id in (:array)";
+	// 	$query = DbHelper::parseArray($format, $ids);
+	// 	$resp = loadApi()->query($query);
 		
-		if(!$resp->success()) throw new Exception($resp->getErrorMessage());
+	// 	if(!$resp->success()) throw new Exception($resp->getErrorMessage());
 
-		$contacts = $resp->getQueryResult()->key("Id");
+	// 	$contacts = $resp->getQueryResult()->key("Id");
 
-		// We only want the 
-		$contactEntities = array_filter($documentLinks->getRecords(), function($link){
+	// 	// We only want the 
+	// 	$contactEntities = array_filter($documentLinks->getRecords(), function($link){
 
-			return self::getSobjectType($link["LinkedEntityId"]) == "Contact";
-		});
+	// 		return self::getSobjectType($link["LinkedEntityId"]) == "Contact";
+	// 	});
 
-		$owners = [];
+	// 	$owners = [];
 
-		foreach($contactEntities as $entity) {
+	// 	foreach($contactEntities as $entity) {
 
-			$owners[$entity["ContentDocumentId"]] = $contacts[$entity["LinkedEntityId"]];
+	// 		$owners[$entity["ContentDocumentId"]] = $contacts[$entity["LinkedEntityId"]];
 		
-		}
+	// 	}
 
-		return $owners;
-	}
+	// 	return $owners;
+	// }
 
 
 
