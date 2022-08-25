@@ -14,17 +14,14 @@ class ContentDocument extends SalesforceFile { // implements ISObject
     private $LinkedEntityId;
 
     public $data;
+
     public $linkedEntities = [];
 
     private $linkedEntityId;
 
     public $isLocal = false;
 
-
-
-
-
-
+    public $sharedWith = [];
 
 
 
@@ -76,6 +73,11 @@ class ContentDocument extends SalesforceFile { // implements ISObject
             return $link["LinkedEntityId"];
 
         }, $links);
+    }
+
+    public function getLinkedEntities() {
+
+        return $this->linkedEntities;
     }
 
     public function id() {
@@ -138,6 +140,19 @@ class ContentDocument extends SalesforceFile { // implements ISObject
 
         return $sharedWith;
 
+    }
+
+
+
+
+    public function getSharedWith() {
+
+        return $this->sharedWith;
+    }
+
+    public function addSharedWith($name) {
+
+        $this->sharedWith[] = $name;
     }
 
     // Is the contact the person who uploaded the document?
