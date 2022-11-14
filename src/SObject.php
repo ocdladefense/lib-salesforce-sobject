@@ -8,29 +8,63 @@ class SObject {
 
 
     // Representation of the underlying SObject.
-    private $sobject;
+    protected $sobject;
 
-    
+    // The name of this SObject, i.e., the SObject type.
     private $name;
 
+    // Any metadata associated with this SObject.
     private $meta;
 
-    private $api;
-
-
+    // The UUID for this SObject.
+    protected $Id;
 
     
-    public function getSObject($name) {
 
-        return $this->sobject[$name];
+
+
+
+
+    public function __construct($data) {
+
+        if(is_array($data)) {
+            foreach(array_keys($data) as $key) {
+                $this->{$key} = $data[$key];
+            }
+        }
+        else $this->name = $data;
     }
 
-    public function getId() {
-        return $this->Id;
+
+    public function loadSObject($object) {
+
+        $this->sobject = $object;
     }
 
 
-    public static function fromSObjects($records){
+	public function setSObject($object) {
+
+		$this->sobject = $object;
+	}
+
+
+    public function getUnderlyingSObject() {
+        return $this->sobject;
+    }
+
+
+    public static function fromSObject($record) {
+        $c = new self($record["Id"]);
+        // $c->AreasOfInterest__r = $r["AreasOfInterest__r"]["records"];
+        foreach(array_keys($record) as $key) {
+            $c->{$key} = $record[$key];
+        }
+
+        return $c;
+    }
+
+
+    public static function fromSObjects($records) {
 
         return array_map(function($r) {
             $c = new self($r["Id"]);
@@ -57,7 +91,7 @@ class SObject {
      * 
      * @param query String A string specifying SObject query syntax.  SObject query syntax is a shorthand relationship/object/field identifiers to retrieve scalar or array values from this Salesforce record.
      */
-    public function getObject($query) {
+    public function query($query) {
 
         $parts = explode(".", $query);
 
@@ -76,6 +110,20 @@ class SObject {
 
 
 
+
+    public function getSObject($name) {
+
+        return $this->sobject[$name];
+    }
+
+
+    
+    public function getId() {
+        return $this->Id;
+    }
+
+
+
     
     public static function toList($records) {
 
@@ -88,10 +136,7 @@ class SObject {
         return $list;
     }
 
-    public function __construct($name){
 
-        $this->name = $name;
-    }
 
 
     public static function fromMetadata($metadata){
