@@ -121,25 +121,6 @@ class SObject {
     }
 
 
-    public static function fromSObjects($records){
-
-        $contacts = array();
-
-        foreach($records as $r){
-
-            $c = new self($r["Id"]);
-
-            // $c->AreasOfInterest__r = $r["AreasOfInterest__r"]["records"];
-
-            foreach(array_keys($r) as $key) {
-                $c->{$key} = $r[$key];
-            }
-            
-            $contacts[] = $c;
-        }
-
-        return $contacts;
-    }
 
 
     public static function toList($records) {
