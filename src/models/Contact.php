@@ -1,6 +1,9 @@
 <?php
 
-class Contact extends \Salesforce\SObject {
+use Salesforce\SObject;
+
+
+class Contact extends SObject {
 
 
     /*
@@ -77,14 +80,6 @@ class Contact extends \Salesforce\SObject {
     public function hasInterests() {
         return !empty($this->AreasOfInterest__r);
     }
-
-
-    
-    public function getExpertWitnessOtherAreas(){
-
-        return $this->Ocdla_Expert_Witness_Other_Areas__c;
-    }
-
 
 
 
