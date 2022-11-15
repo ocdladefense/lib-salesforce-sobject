@@ -7,6 +7,9 @@ namespace Salesforce;
 class SObject {
 
 
+    // The UUID for this SObject.
+    protected $Id;
+
     // Representation of the underlying SObject.
     protected $sobject;
 
@@ -15,11 +18,6 @@ class SObject {
 
     // Any metadata associated with this SObject.
     private $meta;
-
-    // The UUID for this SObject.
-    protected $Id;
-
-    
 
 
 
@@ -39,6 +37,9 @@ class SObject {
     public function loadSObject($object) {
 
         $this->sobject = $object;
+        foreach(array_keys($object) as $key) {
+            $this->{$key} = $object[$key];
+        }
     }
 
 
@@ -94,11 +95,13 @@ class SObject {
     public function query($query) {
 
         $parts = explode(".", $query);
+        // $obj = $this->sobject;
 
         $field1 = array_shift($parts);
         
 		$start = $this->{$field1};
 
+        // var_dump($start);
         if(count($parts) == 0) {
             return $start;
         }
